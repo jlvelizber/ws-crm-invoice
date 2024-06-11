@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health-check', [WPApiController::class, 'checkHealth']);
+Route::post('/invoices', [WPApiController::class, 'invoices']);
 
 
 Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
