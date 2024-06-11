@@ -25,7 +25,7 @@ return new class extends Migration
             $table->decimal('subtotal', 15, 2);
             $table->decimal('tax', 15, 2);
             $table->decimal('total', 15, 2);
-            $table->string('access_key')->unique(); // Clave de acceso
+            $table->string('access_key')->nullable(); // Clave de acceso
             $table->string('authorization_code')->nullable(); // Código de autorización
             $table->string('environment'); // Ambiente (pruebas/producción)
             $table->enum('invoice_status', array_column(InvoiceStatusEnum::cases(), 'value'))->default(InvoiceStatusEnum::PENDING->value); // Estado de la factura (pending, sent, authorized, rejected, etc.)
