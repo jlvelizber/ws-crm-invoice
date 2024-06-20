@@ -38,6 +38,14 @@ class WPApiStoreInvoiceRequest extends FormRequest
             'source' => 'required|string',
             'external_order_id' => 'nullable|integer|unique:invoices,external_order_id',
             'external_customer_id' => 'nullable|string',
+            //validate items with the keys description, quantity, and price
+            'items' => 'required|array',
+            'items.*.description' => 'required|string',
+            'items.*.quantity' => 'required|integer',
+            'items.*.unit_price' => 'required|numeric', 
+            'items.*.total' => 'required|numeric',
+            'items.*.discount' => 'required|numeric',
+            
         ];
     }
 }

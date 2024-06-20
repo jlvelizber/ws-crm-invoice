@@ -26,6 +26,8 @@ class WPApiController extends Controller
     public function invoices(WPApiStoreInvoiceRequest $request)
     {
         $invoice = Invoice::create($request->all());
+        // Save items to invoice
+        $invoice->items()->createMany($request->items);
 
         return response()->json(['status' => 'success', 'invoice' => $invoice], 201);
      
