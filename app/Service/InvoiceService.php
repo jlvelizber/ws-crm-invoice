@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\class\SRIManager;
+use App\Class\XMLFormatter;
+use App\Enums\DocumentSRITypeEnum;
 use App\Models\Invoice;
 use App\Repository\InvoiceRepository;
 use Illuminate\Http\Request;
@@ -9,10 +12,12 @@ use Illuminate\Http\Request;
 class InvoiceService
 {
     protected InvoiceRepository $invoiceRepository;
+    protected SRIManager $sriManager;
 
-    public function __construct(InvoiceRepository $invoiceRepository)
+    public function __construct(InvoiceRepository $invoiceRepository, SRIManager $sriManager)
     {
         $this->invoiceRepository = $invoiceRepository;
+        $this->sriManager = $sriManager;
     }
 
     /**
@@ -31,11 +36,27 @@ class InvoiceService
      * @param Request $request
      * @return void
      */
-    public function saveInvoice(Request $request): Invoice
+    public function saveInvoice(Request $request): Invoice | bool
     {
         $data = $request->all();
 
         $invoice = $this->invoiceRepository->create($data);
+
+        if (!$invoice) return false;
+
+        $dataUpdateInvoice = $invoice->toArray();
+
+        $docymentType = DocumentSRITypeEnum::INVOICE;
+
+        $acessKeyCode = $this->sriManager->generateAccessKeyCode($invoice, $docymentType);
+
+        $dataUpdateInvoice['access_key'] = $acessKeyCode;
+
+        // Actualiza
+        $invoice = $this->invoiceRepository->update($dataUpdateInvoice, $invoice->id);
+        
+        // Formatea Invoice to XML
+        $xml = XMLFormatter::XMLInvoice($invoice);
 
         return $invoice;
     }
@@ -62,8 +83,8 @@ class InvoiceService
     /**
      * Delete Invoice
      */
-    public function deleteInvoice(string | int $id): void
+    public function deleteInvoice(Invoice $invoice): void
     {
-        $this->invoiceRepository->delete($id);
+        $this->invoiceRepository->delete($invoice);
     }
 }

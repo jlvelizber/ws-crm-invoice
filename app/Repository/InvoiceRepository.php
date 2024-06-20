@@ -39,17 +39,22 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     /**
      * Update a invoice
      */
-    public function update(array $data, string | int $id)
+    public function update(array $data, string | int $id): Model
     {
+        $invoice = Invoice::findOrFail($id);
+        $invoice->fill($data);
+        $invoice->update();
+        $invoice = Invoice::findOrFail($id);
+        return $invoice;
     }
 
     /**
      * Delete a invoice
      */
-    public function delete(string | int $id)
+    public function delete(Model $invoice): bool
     {
-        $invoice = Invoice::findOrFail($id);
-        $invoice->delete();
+        $invoice->forceDelete();
+        return true;
     }
 
     /**

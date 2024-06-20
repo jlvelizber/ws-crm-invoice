@@ -5,9 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Http\Requests\StoreInvoiceRequest;
 use App\Http\Requests\UpdateInvoiceRequest;
+use App\Service\InvoiceService;
 
 class InvoiceController extends Controller
 {
+    protected InvoiceService $invoiceService;
+
+    public function __construct(InvoiceService $invoiceService)
+    {
+        $this->invoiceService = $invoiceService;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -45,6 +52,8 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        $this->invoiceService->deleteInvoice($invoice);
+
+        return response()->json(['message' => 'Invoice deleted'], 200);
     }
 }

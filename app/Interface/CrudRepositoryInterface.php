@@ -2,6 +2,7 @@
 
 namespace App\Interface;
 
+use Illuminate\Database\Eloquent\Model;
 
 interface CrudRepositoryInterface
 {
@@ -11,7 +12,7 @@ interface CrudRepositoryInterface
 
     public function update(array $data, string | int $id);
 
-    public function delete(string | int $id);
+    public function delete(Model $model);
 
     public function find(string | int $id);
 }
