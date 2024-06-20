@@ -4,10 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Wp\WPApiStoreInvoiceRequest;
 use App\Models\Invoice;
+use App\Service\InvoiceService;
 use Illuminate\Http\Request;
 
 class WPApiController extends Controller
 {
+    protected InvoiceService $invoiceService;
+
+    public function __construct(InvoiceService $invoiceService) {
+        $this->invoiceService = $invoiceService;
+    }
     /**
      * Check if API is available
      *
@@ -25,9 +31,7 @@ class WPApiController extends Controller
      */
     public function invoices(WPApiStoreInvoiceRequest $request)
     {
-        $invoice = Invoice::create($request->all());
-        // Save items to invoice
-        $invoice->items()->createMany($request->items);
+        $invoice = $this->invoiceService->saveInvoice($request);
 
         return response()->json(['status' => 'success', 'invoice' => $invoice], 201);
      
