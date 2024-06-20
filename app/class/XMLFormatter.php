@@ -2,13 +2,16 @@
 
 namespace App\Class;
 
+use DOMDocument;
 use Illuminate\Database\Eloquent\Model;
+use RobRichards\XMLSecLibs\XMLSecurityDSig;
+use RobRichards\XMLSecLibs\XMLSecurityKey;
 
 class XMLFormatter
 {
     public static function XMLInvoice(Model $invoice)
     {
-        $invoiceData = $invoice->toArray();
+        $invoiceData = $invoice->load('items')->toArray();
 
 
         //TODO
@@ -38,7 +41,7 @@ class XMLFormatter
         $infoTributaria->addChild('razonSocial', $invoiceData['razonSocial']);
         $infoTributaria->addChild('nombreComercial', $invoiceData['nombreComercial']);
         $infoTributaria->addChild('ruc', $invoiceData['ruc']);
-        $infoTributaria->addChild('claveAcceso', $invoiceData['claveAcceso']);
+        $infoTributaria->addChild('claveAcceso', $invoiceData['access_key']);
         $infoTributaria->addChild('codDoc', '01');
         $infoTributaria->addChild('estab', $invoiceData['estab']);
         $infoTributaria->addChild('ptoEmi', $invoiceData['ptoEmi']);
@@ -57,28 +60,64 @@ class XMLFormatter
 
         $totalConImpuestos = $infoFactura->addChild('totalConImpuestos');
         // foreach ($invoiceData['impuestos'] as $impuesto) {
-            $totalImpuesto = $totalConImpuestos->addChild('totalImpuesto');
-            $totalImpuesto->addChild('codigo', $invoiceData['codigo']);
-            $totalImpuesto->addChild('codigoPorcentaje', $invoiceData['codigoPorcentaje']);
-            $totalImpuesto->addChild('baseImponible', $invoiceData['baseImponible']);
-            $totalImpuesto->addChild('valor', $invoiceData['valor']);
+        $totalImpuesto = $totalConImpuestos->addChild('totalImpuesto');
+        $totalImpuesto->addChild('codigo', 2); // TODO EL CODIGO 2 ES IVA, VER REFERENCIA DEL SRI Y LA CONFIGURACION DEL PRODUCTO
+        $totalImpuesto->addChild('codigoPorcentaje', 3); // TODO ESTO ES EL CODIGO DE IVA AL 14% SE DEBE REVISAR DE ACUERDO A LA CONFIGURACION DEL PRODUCTO
+        $totalImpuesto->addChild('baseImponible', $invoiceData['subtotal']);
+        $totalImpuesto->addChild('valor', $invoiceData['total']);
         // }
 
-        $infoFactura->addChild('propina', $invoiceData['propina']);
-        $infoFactura->addChild('importeTotal', $invoiceData['importeTotal']);
+        $infoFactura->addChild('propina', 0);
+        $infoFactura->addChild('importeTotal', $invoiceData['total']);
         $infoFactura->addChild('moneda', 'DOLAR');
 
         $detalles = $xml->addChild('detalles');
-        foreach ($invoiceData['detalles'] as $detalle) {
+        foreach ($invoiceData['items'] as $detalle) {
             $detalleNode = $detalles->addChild('detalle');
-            $detalleNode->addChild('codigoPrincipal', $detalle['codigoPrincipal']);
-            $detalleNode->addChild('descripcion', $detalle['descripcion']);
-            $detalleNode->addChild('cantidad', $detalle['cantidad']);
-            $detalleNode->addChild('precioUnitario', $detalle['precioUnitario']);
-            $detalleNode->addChild('descuento', $detalle['descuento']);
-            $detalleNode->addChild('precioTotalSinImpuesto', $detalle['precioTotalSinImpuesto']);
+            $detalleNode->addChild('codigoPrincipal', 14654); // TODO ENVIAR EL CODIGO DEL PRODUCTO TMB
+            $detalleNode->addChild('descripcion', $detalle['description']);
+            $detalleNode->addChild('cantidad', $detalle['quantity']);
+            $detalleNode->addChild('precioUnitario', $detalle['unit_price']);
+            $detalleNode->addChild('descuento', 0); // TODO DEPENDE DE LA CONFIGURACION DEL PRODUCT
+            $detalleNode->addChild('precioTotalSinImpuesto', $detalle['unit_price']);
         }
 
-        return $xml->asXML();
+        $xml = $xml->asXML();
+        self::signXML($xml);
+    }
+
+
+    /**
+     * 
+     */
+    public static function signXML(string $xml)
+    {
+        $doc = new DOMDocument();
+        $doc->loadXML($xml);
+
+        $objDSig = new XMLSecurityDSig();
+        $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
+        $objDSig->addReference(
+            $doc,
+            XMLSecurityDSig::SHA1,
+            ['http://www.w3.org/2000/09/xmldsig#enveloped-signature'],
+            ['force_uri' => true]
+        );
+        /**
+         * TODO : TODO DEBE VENIR DESDE EL CLIENTE
+         */
+        $p12CertificatePath = storage_path('app/certificates/').'certificate.p12';
+        $p12Password = 'jfTGlm51u9';
+
+        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, ['type' => 'private']);
+        $objKey->passphrase = $p12Password;
+        $objKey->loadKey($p12CertificatePath, true );
+
+        $objDSig->sign($objKey);
+        $objDSig->add509Cert($objKey->getX509Certificate());
+
+        $objDSig->appendSignature($doc->documentElement);
+
+        return $doc->saveXML();
     }
 }
