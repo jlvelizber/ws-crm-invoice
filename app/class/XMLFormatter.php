@@ -4,18 +4,34 @@ namespace App\Class;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Service\SignService;
+use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class XMLFormatter
 {
 
     public SignService $signService;
 
+    /**
+     * Xml Path
+     *
+     * @var string
+     */
+    private string $xmlPath = 'xml/';
+
     public function __construct(SignService $signService)
     {
         $this->signService = $signService;
     }
 
-    public static function XMLInvoice(Model $invoice)
+    /**
+     * Generate XML 
+     *
+     * @param Model $invoice
+     * @return string
+     */
+    public function generateInvoice(Model $invoice)
     {
         $invoiceData = $invoice->load('items')->toArray();
 
@@ -62,7 +78,7 @@ class XMLFormatter
         $infoFactura->addChild('razonSocialComprador', $invoiceData['customer_name']);
         $infoFactura->addChild('identificacionComprador', $invoiceData['customer_identification']);
         $infoFactura->addChild('totalSinImpuestos', $invoiceData['subtotal']);
-        $infoFactura->addChild('totalDescuento', 0); // TODO 
+        $infoFactura->addChild('totalDescuento', 0); // TODO : EXTRAER EL DESCUENTO
 
         $totalConImpuestos = $infoFactura->addChild('totalConImpuestos');
         // foreach ($invoiceData['impuestos'] as $impuesto) {
@@ -89,17 +105,33 @@ class XMLFormatter
         }
 
         $xml = $xml->asXML();
-        self::signXML($xml);
+        $xmlName = Str::snake($invoiceData['razonSocial']);
+        $docName = $this->xmlPath . now()->format('Ymd') . '_' . $xmlName . '_SF.xml';
+        Storage::put($docName, $xml);
+        $this->signXML($docName);
     }
 
 
     /**
      * Sign XML Document
      * @param string $xml
-     * @return string
+     * @return void
      */
-    public static function signXML(string $xml)
+    public  function signXML(string $xmlDocName)
     {
-        return $this->signService->signDocument($xml, 'certificate.p12', '123456');
+        // TODO TODO ESTO DEBE VENIR DEL CLIENTE QUE SE VA A FIRMAR
+        $password = 'jfTGlm51u9';
+        $certificateFilePath = storage_path('app/certificates/certificate.p12');
+        $pathXml = storage_path('app/' . $xmlDocName);
+        $pathSignXml = storage_path('app/' . $this->xmlPath);
+        $xmlDocNameSigned = explode('/', $xmlDocName)[1];
+        $docSigned = str_replace('_SF', '_F',  $xmlDocNameSigned);
+
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            $result = Process::path(storage_path('app/signature/'))->run("java -jar sri.jar $certificateFilePath  $password $pathXml $pathSignXml $docSigned");
+        } else {
+            $result = Process::path(storage_path('app/signature/'))->run("/usr/bin/java -jar -jar sri.jar $certificateFilePath  $password $pathXml $pathSignXml $docSigned");
+        }
+        $output = $result->successful();
     }
 }

@@ -13,11 +13,14 @@ class InvoiceService
 {
     protected InvoiceRepository $invoiceRepository;
     protected SRIManager $sriManager;
+    
+    protected XMLFormatter $xmlFormatter;
 
-    public function __construct(InvoiceRepository $invoiceRepository, SRIManager $sriManager)
+    public function __construct(InvoiceRepository $invoiceRepository, SRIManager $sriManager, XMLFormatter $xmlFormatter)
     {
         $this->invoiceRepository = $invoiceRepository;
         $this->sriManager = $sriManager;
+        $this->xmlFormatter = $xmlFormatter;
     }
 
     /**
@@ -56,7 +59,7 @@ class InvoiceService
         $invoice = $this->invoiceRepository->update($dataUpdateInvoice, $invoice->id);
         
         // Formatea Invoice to XML
-        $xml = XMLFormatter::XMLInvoice($invoice);
+        $xml = $this->xmlFormatter->generateInvoice($invoice);
 
         return $invoice;
     }
