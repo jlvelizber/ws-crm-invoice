@@ -2,13 +2,19 @@
 
 namespace App\Class;
 
-use DOMDocument;
 use Illuminate\Database\Eloquent\Model;
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
+use App\Service\SignService;
 
 class XMLFormatter
 {
+
+    public SignService $signService;
+
+    public function __construct(SignService $signService)
+    {
+        $this->signService = $signService;
+    }
+
     public static function XMLInvoice(Model $invoice)
     {
         $invoiceData = $invoice->load('items')->toArray();
@@ -88,36 +94,12 @@ class XMLFormatter
 
 
     /**
-     * 
+     * Sign XML Document
+     * @param string $xml
+     * @return string
      */
     public static function signXML(string $xml)
     {
-        $doc = new DOMDocument();
-        $doc->loadXML($xml);
-
-        $objDSig = new XMLSecurityDSig();
-        $objDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
-        $objDSig->addReference(
-            $doc,
-            XMLSecurityDSig::SHA1,
-            ['http://www.w3.org/2000/09/xmldsig#enveloped-signature'],
-            ['force_uri' => true]
-        );
-        /**
-         * TODO : TODO DEBE VENIR DESDE EL CLIENTE
-         */
-        $p12CertificatePath = storage_path('app/certificates/').'certificate.p12';
-        $p12Password = 'jfTGlm51u9';
-
-        $objKey = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, ['type' => 'private']);
-        $objKey->passphrase = $p12Password;
-        $objKey->loadKey($p12CertificatePath, true );
-
-        $objDSig->sign($objKey);
-        $objDSig->add509Cert($objKey->getX509Certificate());
-
-        $objDSig->appendSignature($doc->documentElement);
-
-        return $doc->saveXML();
+        return $this->signService->signDocument($xml, 'certificate.p12', '123456');
     }
 }
