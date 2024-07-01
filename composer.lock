@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a683816775865d924f6c8aaf1d0d8196",
+    "content-hash": "23d9900bb360fe8c6156bf3258a2fb58",
     "packages": [
         {
             "name": "brick/math",
@@ -3172,48 +3172,6 @@
             "time": "2024-04-27T21:32:50+00:00"
         },
         {
-            "name": "robrichards/xmlseclibs",
-            "version": "3.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/robrichards/xmlseclibs.git",
-                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/robrichards/xmlseclibs/zipball/f8f19e58f26cdb42c54b214ff8a820760292f8df",
-                "reference": "f8f19e58f26cdb42c54b214ff8a820760292f8df",
-                "shasum": ""
-            },
-            "require": {
-                "ext-openssl": "*",
-                "php": ">= 5.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "RobRichards\\XMLSecLibs\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "A PHP library for XML Security",
-            "homepage": "https://github.com/robrichards/xmlseclibs",
-            "keywords": [
-                "security",
-                "signature",
-                "xml",
-                "xmldsig"
-            ],
-            "support": {
-                "issues": "https://github.com/robrichards/xmlseclibs/issues",
-                "source": "https://github.com/robrichards/xmlseclibs/tree/3.1.1"
-            },
-            "time": "2020-09-05T13:00:25+00:00"
-        },
-        {
             "name": "symfony/clock",
             "version": "v7.1.1",
             "source": {
@@ -6097,16 +6055,16 @@
         },
         {
             "name": "laravel/sail",
-            "version": "v1.29.3",
+            "version": "v1.30.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/sail.git",
-                "reference": "e35b3ffe1b9ea598246d7e99197ee8799f6dc2e5"
+                "reference": "e08b594052385ab9891dd86047e52da8a953c827"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/sail/zipball/e35b3ffe1b9ea598246d7e99197ee8799f6dc2e5",
-                "reference": "e35b3ffe1b9ea598246d7e99197ee8799f6dc2e5",
+                "url": "https://api.github.com/repos/laravel/sail/zipball/e08b594052385ab9891dd86047e52da8a953c827",
+                "reference": "e08b594052385ab9891dd86047e52da8a953c827",
                 "shasum": ""
             },
             "require": {
@@ -6156,7 +6114,7 @@
                 "issues": "https://github.com/laravel/sail/issues",
                 "source": "https://github.com/laravel/sail"
             },
-            "time": "2024-06-12T16:24:41+00:00"
+            "time": "2024-06-18T17:36:56+00:00"
         },
         {
             "name": "mockery/mockery",
