@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\class\SRIManager;
+use App\Class\SRIManager;
 use App\Class\XMLFormatter;
 use App\Enums\DocumentSRITypeEnum;
 use App\Models\Invoice;

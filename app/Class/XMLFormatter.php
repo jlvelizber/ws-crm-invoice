@@ -45,11 +45,11 @@ class XMLFormatter
         $invoiceData['ruc'] = '0926894544001';
         $invoiceData['estab'] = '01';
         $invoiceData['ptoEmi'] = '01';
-        $invoiceData['secuencial'] =  '001002'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
-        $invoiceData['dirMatriz'] =  'ALGUN LUGAR DE ESTE GRAN PAIS'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
-        $invoiceData['dirEstablecimiento'] =  'ESTABLECIMIENTO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
-        $invoiceData['obligadoContabilidad'] =  'NO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
-        $invoiceData['tipoIdentificacionComprador'] =  '01'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['secuencial'] = '001002'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['dirMatriz'] = 'ALGUN LUGAR DE ESTE GRAN PAIS'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['dirEstablecimiento'] = 'ESTABLECIMIENTO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['obligadoContabilidad'] = 'NO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['tipoIdentificacionComprador'] = '01'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
 
 
 
@@ -117,7 +117,7 @@ class XMLFormatter
      * @param string $xml
      * @return void
      */
-    public  function signXML(string $xmlDocName)
+    public function signXML(string $xmlDocName)
     {
         // TODO TODO ESTO DEBE VENIR DEL CLIENTE QUE SE VA A FIRMAR
         $password = 'jfTGlm51u9';
@@ -125,7 +125,8 @@ class XMLFormatter
         $pathXml = storage_path('app/' . $xmlDocName);
         $pathSignXml = storage_path('app/' . $this->xmlPath);
         $xmlDocNameSigned = explode('/', $xmlDocName)[1];
-        $docSigned = str_replace('_SF', '_F',  $xmlDocNameSigned);
+        $docSigned = str_replace('_SF', '_F', $xmlDocNameSigned);
+
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             $result = Process::path(storage_path('app/signature/'))->run("java -jar sri.jar $certificateFilePath  $password $pathXml $pathSignXml $docSigned");
@@ -133,5 +134,15 @@ class XMLFormatter
             $result = Process::path(storage_path('app/signature/'))->run("/usr/bin/java -jar -jar sri.jar $certificateFilePath  $password $pathXml $pathSignXml $docSigned");
         }
         $output = $result->successful();
+        if (!$output) {
+            logger()->error('Error al firmar Documento ' . $xmlDocName . ' ' . $result->errorOutput());
+        } else {
+            logger()->info('Documento ' . $xmlDocName . ' Firmado correctamente');
+
+        }
+
+
+
+        // $output = $result->successful();
     }
 }

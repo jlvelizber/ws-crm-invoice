@@ -1,6 +1,6 @@
 <?php
 
-namespace App\class;
+namespace App\Class;
 
 use App\Enums\DocumentSRITypeEnum;
 use DateTime;
