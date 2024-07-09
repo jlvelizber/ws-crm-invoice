@@ -29,9 +29,9 @@ class XMLFormatter
      * Generate XML 
      *
      * @param Model $invoice
-     * @return string
+     * @return string | bool
      */
-    public function generateInvoice(Model $invoice)
+    public function generateInvoice(Model $invoice) : string | bool
     {
         $invoiceData = $invoice->load('items')->toArray();
 
@@ -108,16 +108,17 @@ class XMLFormatter
         $xmlName = Str::snake($invoiceData['razonSocial']);
         $docName = $this->xmlPath . now()->format('Ymd') . '_' . $xmlName . '_SF.xml';
         Storage::put($docName, $xml);
-        $this->signXML($docName);
+        return $this->signXML($docName);
+        
     }
 
 
     /**
      * Sign XML Document
      * @param string $xml
-     * @return void
+     * @return string | bool
      */
-    public function signXML(string $xmlDocName)
+    public function signXML(string $xmlDocName)  : string | bool
     {
         // TODO TODO ESTO DEBE VENIR DEL CLIENTE QUE SE VA A FIRMAR
         $password = 'jfTGlm51u9';
@@ -136,9 +137,10 @@ class XMLFormatter
         $output = $result->successful();
         if (!$output) {
             logger()->error('Error al firmar Documento ' . $xmlDocName . ' ' . $result->errorOutput());
+            return false;
         } else {
             logger()->info('Documento ' . $xmlDocName . ' Firmado correctamente');
-
+            return $pathSignXml;
         }
 
 

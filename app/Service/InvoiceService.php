@@ -58,8 +58,13 @@ class InvoiceService
         // Actualiza
         $invoice = $this->invoiceRepository->update($dataUpdateInvoice, $invoice->id);
         
-        // Formatea Invoice to XML
+        // Formatea Invoice to XML and sign It
         $xml = $this->xmlFormatter->generateInvoice($invoice);
+        // Send Reception and Confirmation to SRI 
+        if($xml)
+        {
+            $this->sriManager->sedReceptionSRI($xml);
+        }
 
         return $invoice;
     }

@@ -5,9 +5,13 @@ namespace App\Class;
 use App\Enums\DocumentSRITypeEnum;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
+use SoapClient;
 
 class SRIManager
 {
+
+    private SoapClient $soapClient;
+
     /**
      * Genera la Clave de acceso
      *
@@ -50,7 +54,12 @@ class SRIManager
         return $claveAcceso;
     }
 
-
+    /**
+     * Genera Module 11
+     *
+     * @param string $claveAccesoSinDV
+     * @return string
+     */
     private function generateModule11(string $claveAccesoSinDV): string
     {
         $factor = 2;
@@ -62,5 +71,35 @@ class SRIManager
         $modulo11 = 11 - ($suma % 11);
         $digitoVerificador = ($modulo11 == 11) ? 0 : ($modulo11 == 10 ? 1 : $modulo11);
         return $digitoVerificador;
+    }
+
+
+    private function setSoapClient($url, $customConfigSoap = [])
+    {
+        $config = [
+            'trace' => true,
+            'cache_wsdl' => WSDL_CACHE_NONE
+        ];
+
+
+        array_push(
+            $config,
+            $customConfigSoap
+        );
+        $this->soapClient = new SoapClient($url, $config);
+    }
+
+    /**
+     * Valida el Comprobante XML enviado al SRI
+     *
+     * @param string $xmlSigned
+     * @return void
+     */
+    public function sedReceptionSRI(string $xmlSigned)
+    {
+        $this->setSoapClient(config('sri.url_reception'));
+
+        $response = $this->soapClient->validarComprobante($xmlSigned);
+        
     }
 }
