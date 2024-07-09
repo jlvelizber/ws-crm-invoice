@@ -3,8 +3,10 @@
 namespace App\Class;
 
 use App\Enums\DocumentSRITypeEnum;
+use App\Enums\InvoiceStatusEnum;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use SoapClient;
 
 class SRIManager
@@ -74,7 +76,7 @@ class SRIManager
     }
 
 
-    private function setSoapClient($url, $customConfigSoap = [])
+    private function setSoapClient($url, $customConfigSoap = []): void
     {
         $config = [
             'trace' => true,
@@ -86,6 +88,8 @@ class SRIManager
             $config,
             $customConfigSoap
         );
+
+
         $this->soapClient = new SoapClient($url, $config);
     }
 
@@ -93,13 +97,28 @@ class SRIManager
      * Valida el Comprobante XML enviado al SRI
      *
      * @param string $xmlSigned
-     * @return void
+     * @return bool
      */
-    public function sedReceptionSRI(string $xmlSigned)
+    public function sedReceptionSRI(string $xmlSigned): bool
     {
+        $xmlContent = file_get_contents($xmlSigned);
+        if (!$xmlContent) {
+            logger()->error('Error al enviar la recepcion del XML ' . $xmlSigned);
+            return false;
+        }
+
+
         $this->setSoapClient(config('sri.url_reception'));
 
-        $response = $this->soapClient->validarComprobante($xmlSigned);
-        
+        $response = $this->soapClient->validarComprobante(['xml' => $xmlContent]);
+        // dd($response->RespuestaRecepcionComprobante);
+        if ($response->RespuestaRecepcionComprobante->estado === InvoiceStatusEnum::SRI_WDSL_STATUS_RECIEVED->value) {
+            logger()->info('factura con ruta ' . $xmlSigned . ' ha sido recibida por la entidad del SRI');
+            return true;
+        }
+
+
+        return false;
+
     }
 }

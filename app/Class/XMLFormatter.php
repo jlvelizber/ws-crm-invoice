@@ -2,6 +2,7 @@
 
 namespace App\Class;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use App\Service\SignService;
 use Illuminate\Support\Facades\Process;
@@ -43,14 +44,14 @@ class XMLFormatter
         $invoiceData['razonSocial'] = 'VELIZ BERZOSA JORGE LUIS';
         $invoiceData['nombreComercial'] = 'VELIZ BERZOSA JORGE LUIS';
         $invoiceData['ruc'] = '0926894544001';
-        $invoiceData['estab'] = '01';
-        $invoiceData['ptoEmi'] = '01';
-        $invoiceData['secuencial'] = '001002'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['estab'] = '001';
+        $invoiceData['ptoEmi'] = '001';
+        $invoiceData['secuencial'] = '000001002'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['dirMatriz'] = 'ALGUN LUGAR DE ESTE GRAN PAIS'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['dirEstablecimiento'] = 'ESTABLECIMIENTO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['obligadoContabilidad'] = 'NO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
-        $invoiceData['tipoIdentificacionComprador'] = '01'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
-
+        $invoiceData['tipoIdentificacionComprador'] = '05'; //TODO REFERENCIAR DE TABLA 6
+        $invoiceData['created_at'] = Carbon::parseFromLocale($invoiceData['created_at'])->format("d/m/Y");
 
 
         $xml = new \SimpleXMLElement('<factura/>');
@@ -102,6 +103,14 @@ class XMLFormatter
             $detalleNode->addChild('precioUnitario', $detalle['unit_price']);
             $detalleNode->addChild('descuento', 0); // TODO DEPENDE DE LA CONFIGURACION DEL PRODUCT
             $detalleNode->addChild('precioTotalSinImpuesto', $detalle['unit_price']);
+            // impuestos
+            $detalleImpuestosNode = $detalleNode->addChild('impuestos');
+            $detalleImpuestoNode = $detalleImpuestosNode->addChild('impuesto');
+            $detalleImpuestoNode->addChild('codigo',2);
+            $detalleImpuestoNode->addChild('codigoPorcentaje',4);
+            $detalleImpuestoNode->addChild('tarifa',15.00);
+            $detalleImpuestoNode->addChild('baseImponible',$detalle['unit_price']);
+            $detalleImpuestoNode->addChild('valor',$invoiceData['total']);
         }
 
         $xml = $xml->asXML();
@@ -140,7 +149,7 @@ class XMLFormatter
             return false;
         } else {
             logger()->info('Documento ' . $xmlDocName . ' Firmado correctamente');
-            return $pathSignXml;
+            return $pathSignXml.$docSigned;
         }
 
 

@@ -8,4 +8,7 @@ enum InvoiceStatusEnum: string
     case SENT = 'sent';
     case SIGNED = 'signed';
     case authorized = 'authorized';
+
+
+    case SRI_WDSL_STATUS_RECIEVED = 'RECIBIDA';
 }
