@@ -121,4 +121,33 @@ class SRIManager
         return false;
 
     }
+    /**
+     * Send to Confirmation SRI
+     * @param mixed $xmlSigned
+     * @return bool
+     */
+    public function sendConfirmationSRI(string $accessKey): bool
+    {
+        $this->setSoapClient(config('sri.url_authorization'));
+
+        $response = $this->soapClient->autorizacionComprobante(['claveAccesoComprobante' => $accessKey]);
+        dd($response);
+        if ($response->RespuestaRecepcionComprobante->estado === InvoiceStatusEnum::SRI_WDSL_STATUS_RECIEVED->value) {
+            // logger()->info('factura con ruta ' . $xmlSigned . ' ha sido recibida por la entidad del SRI');
+            return true;
+        }
+
+
+        return false;
+
+ 
+    }
+
+
+
+    public function sendToSRI(string $xmlSigned, string $accessKey): bool
+    {
+        $this->sedReceptionSRI($xmlSigned);
+        $this->sendConfirmationSRI($accessKey);
+    }
 }

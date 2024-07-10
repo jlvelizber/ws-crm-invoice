@@ -61,11 +61,9 @@ class InvoiceService
         // Formatea Invoice to XML and sign It
         $xml = $this->xmlFormatter->generateInvoice($invoice);
         // Send Reception and Confirmation to SRI 
-        if($xml)
-        {
-            $this->sriManager->sedReceptionSRI($xml);
-        }
+        $this->sriManager->sendToSRI($xml, $invoice->access_key);
 
+        //
         return $invoice;
     }
 
