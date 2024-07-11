@@ -11,4 +11,5 @@ enum InvoiceStatusEnum: string
 
 
     case SRI_WDSL_STATUS_RECIEVED = 'RECIBIDA';
+    case SRI_WDSL_STATUS_AUTHORIZED = 'AUTORIZADO';
 }

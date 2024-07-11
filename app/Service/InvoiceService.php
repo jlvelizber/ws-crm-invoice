@@ -4,7 +4,7 @@ namespace App\Service;
 
 use App\Class\SRIManager;
 use App\Class\XMLFormatter;
-use App\Enums\DocumentSRITypeEnum;
+use App\Enums\SRI\SRIDocumentTypeEnum;
 use App\Models\Invoice;
 use App\Repository\InvoiceRepository;
 use Illuminate\Http\Request;
@@ -49,7 +49,7 @@ class InvoiceService
 
         $dataUpdateInvoice = $invoice->toArray();
 
-        $docymentType = DocumentSRITypeEnum::INVOICE;
+        $docymentType = SRIDocumentTypeEnum::INVOICE;
 
         $acessKeyCode = $this->sriManager->generateAccessKeyCode($invoice, $docymentType);
 
