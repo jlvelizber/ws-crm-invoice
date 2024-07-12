@@ -12,9 +12,12 @@ return [
 
     // URL Authorization
 
-    'url_authorization' => env('SRI_URL_AUTHORIZATION', 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl')
+    'url_authorization' => env('SRI_URL_AUTHORIZATION', 'https://celcer.sri.gob.ec/comprobantes-electronicos-ws/AutorizacionComprobantesOffline?wsdl'),
 
 
+    
 
+    // SRI timeout
+    'timeout_connection' => env('SRI_CONNECTION_TIMEOUT', 180),
 
 ];

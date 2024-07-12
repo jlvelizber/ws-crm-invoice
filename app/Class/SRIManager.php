@@ -6,8 +6,8 @@ use App\Enums\SRI\SRIDocumentTypeEnum;
 use App\Enums\InvoiceStatusEnum;
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
 use SoapClient;
+use SoapFault;
 
 class SRIManager
 {
@@ -31,7 +31,7 @@ class SRIManager
         $ruc = '0926894544001'; //TODO SACAR DESDE EL CLIENTE
         $ambiente = 1; // TODO SACAR DESDE EL CLIENTE
         $serie = '001001'; //TODO: SACAR DESDE EL CLIENTE
-        $numeroComprobante = '001010'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $numeroComprobante = '001016'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $tipoEmision = 1; // TODO: NORMAL SACAR DESDE LA CONFIGURACION DEL CLIENTE
 
         // Código numérico aleatorio de 8 dígitos
@@ -80,7 +80,8 @@ class SRIManager
     {
         $config = [
             'trace' => true,
-            'cache_wsdl' => WSDL_CACHE_NONE
+            'cache_wsdl' => WSDL_CACHE_NONE,
+            'connection_timeout' => config('sri.timeout_connection')
         ];
 
 
@@ -89,8 +90,11 @@ class SRIManager
             $customConfigSoap
         );
 
-
-        $this->soapClient = new SoapClient($url, $config);
+        try {
+            $this->soapClient = new SoapClient($url, $config);
+        } catch (SoapFault $e) {
+            dd($e);
+        }
     }
 
     /**
@@ -99,7 +103,7 @@ class SRIManager
      * @param string $xmlSigned
      * @return bool
      */
-    public function sedReceptionSRI(string $xmlSigned, string | int $accessKey): bool
+    public function sedReceptionSRI(string $xmlSigned, string|int $accessKey): bool
     {
         $xmlContent = file_get_contents($xmlSigned);
         if (!$xmlContent) {
@@ -112,7 +116,7 @@ class SRIManager
 
         $response = $this->soapClient->validarComprobante(['xml' => $xmlContent]);
 
-        $stateDocument = $response->RespuestaRecepcionComprobante->estado ;
+        $stateDocument = $response->RespuestaRecepcionComprobante->estado;
 
         if ($stateDocument === InvoiceStatusEnum::SRI_WDSL_STATUS_RECIEVED->value) {
             logger()->info('factura con codigo de acceso ' . $accessKey . ' ha sido recibida por la entidad del SRI');
@@ -120,7 +124,7 @@ class SRIManager
         }
         $codeValidationSRI = $response->RespuestaRecepcionComprobante->comprobantes->comprobante->mensajes->mensaje->identificador;
         $messageValidationSRI = $response->RespuestaRecepcionComprobante->comprobantes->comprobante->mensajes->mensaje->mensaje;
-        logger()->error('factura con codigo de acceso ' . $accessKey . ' no ha sido recibida por la entidad del SRI: Razon .-'. $stateDocument . ' ' .$codeValidationSRI. '- ' .$messageValidationSRI);
+        logger()->error('factura con codigo de acceso ' . $accessKey . ' no ha sido recibida por la entidad del SRI: Razon .-' . $stateDocument . ' ' . $codeValidationSRI . '- ' . $messageValidationSRI);
         return false;
 
     }
@@ -134,25 +138,31 @@ class SRIManager
         $this->setSoapClient(config('sri.url_authorization'));
 
         $response = $this->soapClient->autorizacionComprobante(['claveAccesoComprobante' => $accessKey]);
-        
+
         if ($response->RespuestaAutorizacionComprobante->autorizaciones->autorizacion->estado === InvoiceStatusEnum::SRI_WDSL_STATUS_AUTHORIZED->value) {
             $authNum = $response->RespuestaAutorizacionComprobante->autorizaciones->autorizacion->numeroAutorizacion;
-            logger()->info('factura con con codigo de acceso ' . $accessKey . ' ha sido AUTORIZADA por la entidad del SRI :  num autorizacion : '. $authNum);
-            // return true;
+            logger()->info('factura con con codigo de acceso ' . $accessKey . ' ha sido AUTORIZADA por la entidad del SRI :  num autorizacion : ' . $authNum);
+            return true;
         }
 
         logger()->error('factura con con codigo de acceso ' . $accessKey . ' no  ha sido recibida por la entidad del SRI ');
-        // return false;
+        return false;
 
 
     }
 
 
-
-    public function sendToSRI(string $xmlSigned, string $accessKey): void
+    /**
+     * Send to Reception and Confirm to SRI
+     * @param string $xmlSigned
+     * @param string $accessKey
+     * @return bool
+     */
+    public function sendToSRI(string $xmlSigned, string $accessKey): bool
     {
         $wasRecepted = $this->sedReceptionSRI($xmlSigned, $accessKey);
         if ($wasRecepted)
-            $this->sendConfirmationSRI($accessKey);
+            return $this->sendConfirmationSRI($accessKey);
+        return false;
     }
 }
