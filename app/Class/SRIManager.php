@@ -31,7 +31,7 @@ class SRIManager
         $ruc = '0926894544001'; //TODO SACAR DESDE EL CLIENTE
         $ambiente = 1; // TODO SACAR DESDE EL CLIENTE
         $serie = '001001'; //TODO: SACAR DESDE EL CLIENTE
-        $numeroComprobante = '001016'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $numeroComprobante = '001017'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $tipoEmision = 1; // TODO: NORMAL SACAR DESDE LA CONFIGURACION DEL CLIENTE
 
         // Código numérico aleatorio de 8 dígitos

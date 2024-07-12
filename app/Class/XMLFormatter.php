@@ -47,7 +47,7 @@ class XMLFormatter
         $invoiceData['ruc'] = '0926894544001';
         $invoiceData['estab'] = '001';
         $invoiceData['ptoEmi'] = '001';
-        $invoiceData['secuencial'] = '000001016'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['secuencial'] = '000001017'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['dirMatriz'] = 'ALGUN LUGAR DE ESTE GRAN PAIS'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['dirEstablecimiento'] = 'ESTABLECIMIENTO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['obligadoContabilidad'] = 'NO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
