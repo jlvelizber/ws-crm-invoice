@@ -140,8 +140,10 @@ class XMLFormatter
 
 
         if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            logger()->info("entra a win");
             $result = Process::path(storage_path('app/signature/'))->run("java -jar sri.jar $certificateFilePath  $password $pathXml $pathSignXml $docSigned");
         } else {
+            logger()->info("entra a linux");
             $result = Process::path(storage_path('app/signature/'))->run("/usr/bin/java -jar -jar sri.jar $certificateFilePath  $password $pathXml $pathSignXml $docSigned");
         }
         $output = $result->successful();

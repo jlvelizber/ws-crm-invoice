@@ -105,7 +105,14 @@ class SRIManager
      */
     public function sedReceptionSRI(string $xmlSigned, string|int $accessKey): bool
     {
+        
+        if(!$xmlSigned) {
+            logger()->error('La ruta del XML no se encuentra ' . $xmlSigned);
+            return false;
+        }
+        
         $xmlContent = file_get_contents($xmlSigned);
+        
         if (!$xmlContent) {
             logger()->error('Error al enviar la recepcion del XML ' . $xmlSigned);
             return false;
