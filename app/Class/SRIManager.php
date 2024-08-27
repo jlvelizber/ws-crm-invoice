@@ -31,7 +31,7 @@ class SRIManager
         $ruc = '0926894544001'; //TODO SACAR DESDE EL CLIENTE
         $ambiente = 1; // TODO SACAR DESDE EL CLIENTE
         $serie = '001001'; //TODO: SACAR DESDE EL CLIENTE
-        $numeroComprobante = '001017'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $numeroComprobante = '001021'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $tipoEmision = 1; // TODO: NORMAL SACAR DESDE LA CONFIGURACION DEL CLIENTE
 
         // Código numérico aleatorio de 8 dígitos
@@ -105,14 +105,14 @@ class SRIManager
      */
     public function sedReceptionSRI(string $xmlSigned, string|int $accessKey): bool
     {
-        
-        if(!$xmlSigned) {
+
+        if (!$xmlSigned) {
             logger()->error('La ruta del XML no se encuentra ' . $xmlSigned);
             return false;
         }
-        
+
         $xmlContent = file_get_contents($xmlSigned);
-        
+
         if (!$xmlContent) {
             logger()->error('Error al enviar la recepcion del XML ' . $xmlSigned);
             return false;

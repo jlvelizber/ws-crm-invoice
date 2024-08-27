@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\WPApiController;
@@ -16,3 +17,4 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 });
 
 Route::apiResource('plans', PlanController::class);
+Route::apiResource('customers', CustomerController::class);

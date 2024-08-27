@@ -11,7 +11,8 @@ class WPApiController extends Controller
 {
     protected InvoiceService $invoiceService;
 
-    public function __construct(InvoiceService $invoiceService) {
+    public function __construct(InvoiceService $invoiceService)
+    {
         $this->invoiceService = $invoiceService;
     }
     /**
@@ -31,9 +32,9 @@ class WPApiController extends Controller
      */
     public function invoices(WPApiStoreInvoiceRequest $request)
     {
-        $invoice = $this->invoiceService->saveInvoice($request);
+        $invoice = $this->invoiceService->process($request);
 
         return response()->json(['status' => 'success', 'invoice' => $invoice], 201);
-     
+
     }
 }

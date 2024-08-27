@@ -2,9 +2,11 @@
 
 namespace App\Repository;
 
-use App\Interface\InvoiceRepositoryInterface;
+use App\RepositoryInterface\InvoiceRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Invoice;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
@@ -13,7 +15,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
      */
     public function all()
     {
-        //
+        return Invoice::all();
     }
 
     /**
@@ -22,24 +24,26 @@ class InvoiceRepository implements InvoiceRepositoryInterface
      * @param array $data
      * @return Model | null
      */
-    public function create(array $data): Model | null
+    public function create(array $data): Model|Exception
     {
-        try {
-            //code...
-            $invoice = Invoice::create($data);
-            // Save items to invoice
-            $invoice->items()->createMany($data['items']);
+        //code...
+        $invoice = Invoice::create($data);
+        // Save items to invoice
+        $invoice->items()->createMany($data['items']);
 
-            return $invoice;
-        } catch (\Throwable $th) {
-            throw new \Exception($th->getMessage(), $th->getCode());
+        if (!$invoice) {
+            throw new \Exception('No se ha podido guardar la factura');
+
         }
+
+        return $invoice;
+
     }
 
     /**
      * Update a invoice
      */
-    public function update(array $data, string | int $id): Model
+    public function update(array $data, string|int $id): Model
     {
         $invoice = Invoice::findOrFail($id);
         $invoice->fill($data);
@@ -51,9 +55,9 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     /**
      * Delete a invoice
      */
-    public function delete(Model $invoice): bool
+    public function delete(int|string $invoiceId): bool
     {
-        $invoice->forceDelete();
+        $this->find($invoiceId)->delete();
         return true;
     }
 
@@ -62,12 +66,12 @@ class InvoiceRepository implements InvoiceRepositoryInterface
      * @param string | int $id
      * @return Model | null
      */
-    public function find(string | int $id): Model | null
+    public function find(string|int $id): Model|ModelNotFoundException
     {
-        try {
-            return Invoice::findOrFail($id);
-        } catch (\Throwable $th) {
-            throw new \Exception($th->getMessage(), $th->getCode());
-        }
+
+        $invoice = Invoice::findOrFail($id);
+        if (!$invoice)
+            throw new ModelNotFoundException('Factura no encontrada');
+        return $invoice;
     }
 }

@@ -47,7 +47,7 @@ class XMLFormatter
         $invoiceData['ruc'] = '0926894544001';
         $invoiceData['estab'] = '001';
         $invoiceData['ptoEmi'] = '001';
-        $invoiceData['secuencial'] = '000001017'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
+        $invoiceData['secuencial'] = '000001021'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['dirMatriz'] = 'ALGUN LUGAR DE ESTE GRAN PAIS'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['dirEstablecimiento'] = 'ESTABLECIMIENTO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
         $invoiceData['obligadoContabilidad'] = 'NO'; //TODO SACAR DESDE LA ULTIMA FACTURA DEL CLIENTE
@@ -88,7 +88,7 @@ class XMLFormatter
         $totalImpuesto->addChild('codigo', SRITaxesEnum::IVA->value); // TODO EL CODIGO 2 ES IVA, VER REFERENCIA DEL SRI Y LA CONFIGURACION DEL PRODUCTO
         $totalImpuesto->addChild('codigoPorcentaje', SRITaxeIVAFee::FIFTEEN->value); // TODO ESTO ES EL CODIGO DE IVA AL 14% SE DEBE REVISAR DE ACUERDO A LA CONFIGURACION DEL PRODUCTO
         $totalImpuesto->addChild('baseImponible', $invoiceData['subtotal']);
-        $totalImpuesto->addChild('valor', $invoiceData['subtotal'] * 0.15 ); // TODO: REALIZAR UN CALCULO AGNOSTICO DE ACUERDO AL TIPO DE IVA
+        $totalImpuesto->addChild('valor', $invoiceData['subtotal'] * 0.15); // TODO: REALIZAR UN CALCULO AGNOSTICO DE ACUERDO AL TIPO DE IVA
         // }
 
         $infoFactura->addChild('propina', 0);
@@ -111,7 +111,7 @@ class XMLFormatter
             $detalleImpuestoNode->addChild('codigoPorcentaje', SRITaxeIVAFee::FIFTEEN->value);
             $detalleImpuestoNode->addChild('tarifa', 15);
             $detalleImpuestoNode->addChild('baseImponible', $detalle['unit_price']);
-            $detalleImpuestoNode->addChild('valor',  $detalle['unit_price'] * 0.15);
+            $detalleImpuestoNode->addChild('valor', $detalle['unit_price'] * 0.15);
         }
 
         $xml = $xml->asXML();
@@ -128,7 +128,7 @@ class XMLFormatter
      * @param string $xml
      * @return string | bool
      */
-    public function signXML(string $xmlDocName, string | int $accessKey): string|bool
+    public function signXML(string $xmlDocName, string|int $accessKey): string|bool
     {
         // TODO TODO ESTO DEBE VENIR DEL CLIENTE QUE SE VA A FIRMAR
         $password = 'jfTGlm51u9';
