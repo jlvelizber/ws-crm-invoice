@@ -36,7 +36,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     /**
      * Update a customer
      */
-    public function update(array $data, string|int $id): Model
+    public function update(array $data, string|int $id): Customer
     {
         $customer = Customer::findOrFail($id);
         $customer->fill($data);
@@ -64,6 +64,14 @@ class CustomerRepository implements CustomerRepositoryInterface
         $customer = Customer::findOrFail($id);
         if (!$customer)
             throw new ModelNotFoundException('Cliente no existe', 404);
+        return $customer;
+    }
+
+    public function findByNumIdentification(string $numIdentification, $columns = ['*']): Customer|null
+    {
+        $customer = Customer::where('identification', $numIdentification)->first($columns);
+        if (!$customer)
+            return null;
         return $customer;
     }
 }

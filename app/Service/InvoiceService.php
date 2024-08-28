@@ -6,65 +6,42 @@ use App\Class\SRIManager;
 use App\Class\XMLFormatter;
 use App\Enums\SRI\SRIDocumentTypeEnum;
 use App\Interface\SRIServiceInterface;
+use App\Models\Customer;
 use App\Models\Invoice;
-use App\Repository\InvoiceRepository;
+use App\RepositoryInterface\CustomerRepositoryInterface;
+use App\RepositoryInterface\InvoiceRepositoryInterface;
 use Illuminate\Http\Request;
 
 class InvoiceService implements SRIServiceInterface
 {
-    protected InvoiceRepository $invoiceRepository;
+    protected InvoiceRepositoryInterface $invoiceRepositoryInterface;
+    protected CustomerRepositoryInterface $customerRepositoryInterface;
     protected SRIManager $sriManager;
 
     protected XMLFormatter $xmlFormatter;
 
-    public function __construct(InvoiceRepository $invoiceRepository, SRIManager $sriManager, XMLFormatter $xmlFormatter)
-    {
-        $this->invoiceRepository = $invoiceRepository;
+    public function __construct(
+        InvoiceRepositoryInterface $invoiceRepositoryInterface,
+        SRIManager $sriManager,
+        XMLFormatter $xmlFormatter,
+        CustomerRepositoryInterface $customerRepositoryInterface
+    ) {
+        $this->invoiceRepositoryInterface = $invoiceRepositoryInterface;
         $this->sriManager = $sriManager;
         $this->xmlFormatter = $xmlFormatter;
-    }
-
-    /**
-     * Get All invoices
-     *
-     * @return void
-     */
-    public function getAllInvoices()
-    {
-        return $this->invoiceRepository->all();
-    }
-
-    /**
-     * Get Invoice
-     */
-    public function getInvoice(string|int $id): Invoice
-    {
-        return $this->invoiceRepository->find($id);
+        $this->customerRepositoryInterface = $customerRepositoryInterface;
     }
 
 
-    /**
-     * Update invoice
-     */
-    public function updateInvoice(Request $request, string|int $id)
+    public function manageCustomer(array $data): Customer
     {
-        $data = $request->all();
-
-        return $this->invoiceRepository->update($data, $id);
-    }
-
-    /**
-     * Delete Invoice
-     */
-    public function deleteInvoice(Invoice $invoice): void
-    {
-        $this->invoiceRepository->delete($invoice);
-    }
-
-
-    public function manageCustomer(array $data)
-    {
-
+        $identification = $data["identification"];
+        $customer = $this->customerRepositoryInterface->findByNumIdentification($identification);
+        if (!$customer) {
+            $newCustomer = $this->customerRepositoryInterface->create($data);
+            return $newCustomer;
+        }
+        return $this->customerRepositoryInterface->update($data, $customer->id);
     }
 
 
@@ -76,13 +53,16 @@ class InvoiceService implements SRIServiceInterface
      */
     public function process(Request $request): Invoice|bool
     {
-        $customer = $request->get('customer');
+        $customerData = $request->get('customer');
 
+        $customer = $this->manageCustomer($customerData);
 
 
         $restPayload = $request->except('customer');
 
-        $invoice = $this->invoiceRepository->create($restPayload);
+        $restPayload['customer_id'] = $customer->id;
+
+        $invoice = $this->invoiceRepositoryInterface->create($restPayload);
 
         if (!$invoice)
             return false;
@@ -96,7 +76,7 @@ class InvoiceService implements SRIServiceInterface
         $dataUpdateInvoice['access_key'] = $acessKeyCode;
 
         // Actualiza
-        $invoice = $this->invoiceRepository->update($dataUpdateInvoice, $invoice->id);
+        $invoice = $this->invoiceRepositoryInterface->update($dataUpdateInvoice, $invoice->id);
 
         // Formatea Invoice to XML and sign It
         $xml = $this->xmlFormatter->generateInvoice($invoice);

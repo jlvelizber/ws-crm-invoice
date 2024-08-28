@@ -2,8 +2,8 @@
 
 namespace App\Enums;
 
-enum SourceCreateInvoiceEnum : string
+enum SourceCreateInvoiceEnum: string
 {
-    case WORDPRESS = 'wordpress';
-    case EXTERNAL = 'exexternal';
+    case LOCAL = 'local';
+    case EXTERNAL = 'external';
 }

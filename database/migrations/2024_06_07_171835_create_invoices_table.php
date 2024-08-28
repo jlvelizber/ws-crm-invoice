@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -17,11 +16,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('wp_order_id')->nullable()->unique(); // WordPress Order ID (nullable for external sources)
             $table->string('invoice_number')->unique();
-            $table->date('issue_date');
-            $table->string('customer_name');
-            $table->string('customer_identification');
-            $table->string('customer_address')->nullable();
-            $table->string('customer_email')->nullable();
+            $table->date('issue_date')->nullable(); // FOR EXTERNAL USE
+            $table->integer('customer_id');
             $table->decimal('subtotal', 15, 2);
             $table->decimal('tax', 15, 2);
             $table->decimal('total', 15, 2);
@@ -30,9 +26,10 @@ return new class extends Migration
             $table->string('environment'); // Ambiente (pruebas/producción)
             $table->enum('invoice_status', array_column(InvoiceStatusEnum::cases(), 'value'))->default(InvoiceStatusEnum::PENDING->value); // Estado de la factura (pending, sent, authorized, rejected, etc.)
             $table->json('additional_info')->nullable(); // Información adicional
-            $table->enum('source',  array_column(SourceCreateInvoiceEnum::cases(), 'value'))->default(SourceCreateInvoiceEnum::WORDPRESS->value); // Fuente de la factura (wordpress, external)
+            $table->enum('source', array_column(SourceCreateInvoiceEnum::cases(), 'value'))->default(SourceCreateInvoiceEnum::LOCAL->value); // Fuente de la factura (wordpress, external)
             $table->timestamps();
             $table->softDeletes(); //
+
         });
     }
 

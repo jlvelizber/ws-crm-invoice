@@ -11,13 +11,10 @@ class Invoice extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'wp_order_id',
+        'order_id',
         'invoice_number',
         'issue_date',
-        'customer_name',
-        'customer_identification',
-        'customer_address',
-        'customer_email',
+        'customer_id',
         'subtotal',
         'tax',
         'total',

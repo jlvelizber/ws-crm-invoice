@@ -1,6 +1,7 @@
 <?php
 namespace App\Interface;
 
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 interface SRIServiceInterface
@@ -17,5 +18,5 @@ interface SRIServiceInterface
      * @param array $data
      * @return void
      */
-    public function manageCustomer(array $data);
+    public function manageCustomer(array $data): Customer;
 }

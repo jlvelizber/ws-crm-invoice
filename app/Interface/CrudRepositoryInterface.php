@@ -11,7 +11,7 @@ interface CrudRepositoryInterface
 
     public function create(array $data): Model|Exception;
 
-    public function update(array $data, string|int $id);
+    public function update(array $data, string|int $id): Model;
 
     public function delete(string|int $id): bool|Exception;
 
