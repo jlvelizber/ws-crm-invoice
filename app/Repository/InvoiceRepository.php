@@ -6,6 +6,7 @@ use App\RepositoryInterface\InvoiceRepositoryInterface;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Invoice;
 use Exception;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
@@ -13,7 +14,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     /**
      * Get all invoices
      */
-    public function all()
+    public function all(): Collection
     {
         return Invoice::all();
     }

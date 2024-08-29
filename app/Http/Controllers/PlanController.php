@@ -6,16 +6,27 @@ use App\Http\Resources\PlanResource;
 use App\Models\Plan;
 use App\Http\Requests\StorePlanRequest;
 use App\Http\Requests\UpdatePlanRequest;
+use App\Service\PlanService;
+use Exception;
 
 class PlanController extends Controller
 {
+
+    public function __construct(protected PlanService $planService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $plans = Plan::all();
-        return PlanResource::collection($plans);
+        try {
+            $plans = $this->planService->listAllPlans();
+            return PlanResource::collection($plans);
+        } catch (Exception $th) {
+            return response()->json(['message' => $th->getMessage(), 'success' => false], 500);
+        }
     }
 
     /**
@@ -23,14 +34,12 @@ class PlanController extends Controller
      */
     public function store(StorePlanRequest $request)
     {
-        $planRequest = $request->all();
-        $plan = new Plan();
-        $plan->fill($planRequest);
-        $saved = $plan->save();
-
-        if ($saved) return new PlanResource($plan);
-
-        return response()->json(['message' => 'An Error occurred'], 500);
+        try {
+            $plans = $this->planService->createPlan($request->all());
+            return new PlanResource($plans);
+        } catch (Exception $th) {
+            return response()->json(['message' => $th->getMessage(), 'success' => false], 500);
+        }
     }
 
     /**
@@ -39,7 +48,12 @@ class PlanController extends Controller
     public function show(Plan $plan)
     {
 
-        return new PlanResource($plan);
+        try {
+            $resource = $this->planService->findPlanById($plan->id);
+            return new PlanResource($resource);
+        } catch (Exception $th) {
+            return response()->json(['message' => $th->getMessage(), 'success' => false], $th->getCode());
+        }
     }
 
     /**
@@ -47,11 +61,12 @@ class PlanController extends Controller
      */
     public function update(UpdatePlanRequest $request, Plan $plan)
     {
-        $plan->fill($request->all());
-        $updated = $plan->update();
-        if ($updated) return new PlanResource($plan);
-
-        return response()->json(['message' => 'An Error occurred'], 500);
+        try {
+            $plans = $this->planService->updatePlan($request->all(), $plan->id);
+            return new PlanResource($plans);
+        } catch (Exception $th) {
+            return response()->json(['message' => $th->getMessage(), 'success' => false], 500);
+        }
     }
 
     /**
@@ -59,8 +74,11 @@ class PlanController extends Controller
      */
     public function destroy(Plan $plan)
     {
-        $plan->delete();
-
-        return response()->json(['message' => 'Plan deleted succesfully'], 200);
+        try {
+            $this->planService->deletePlan($plan->id);
+            return response()->json(['message' => 'Plan deleted succesfully'], 200);
+        } catch (Exception $th) {
+            return response()->json(['message' => $th->getMessage(), 'success' => false], 500);
+        }
     }
 }
